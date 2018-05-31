@@ -1,0 +1,236 @@
+---
+title: "analysis"
+author: "Daniel Chen"
+date: "5/30/2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(scipen = 999)
+library(readxl)
+
+df <- read_excel(here::here('data/HEBOnewworksheet5.21.xlsx'))
+
+# replace 999 with NA missing value
+df[df == 999] <- NA
+```
+
+
+re-code the `Hydrogen` and `Methane` to dentoe any increase in gas
+
+```{r}
+recode_any_rise <- function(h2_me_value) {
+    if (h2_me_value %in% c(0, 10, 20)) {
+        return('no rise')
+    } else if (h2_me_value %in% c(1, 2, 11, 12, 21, 22)) {
+        return('some rise')
+    } else {
+        return(NA)
+    }
+}
+
+df$any_h2_rise <- sapply(df$Hydrogen, recode_any_rise)
+df$any_me_rise <- sapply(df$Methane, recode_any_rise)
+df$any_h2me_rise <- ifelse(
+  df$any_h2_rise == 'some rise' | df$any_me_rise == 'some rise',
+  'some rise', 'no rise')
+```
+
+# Crosstabluate the gas elevation
+
+Cross tablulate the recoded variables against the original Hydrogen and Methane values
+
+```{r}
+addmargins(table(df$Hydrogen, df$any_h2_rise, useNA = 'always'))
+```
+
+```{r}
+addmargins(table(df$Methane, df$any_me_rise, useNA = 'always'))
+```
+
+Crosstabulate the variables to look at any gas increase
+
+```{r}
+addmargins(table(df$any_h2_rise, df$any_me_rise, useNA = 'always'))
+```
+
+
+```{r}
+table(df$any_h2me_rise)
+```
+
+The group is well balanced here when we collapse the groups into no rise and some rise for both gases.
+
+# Pairwise tests
+
+Performing a pair-wise test between the variables to the reponse variable (`any_h2me_rise`)
+
+## Categorical Variables
+
+```{r, echo=FALSE}
+df$Etiology <- as.factor(df$Etiology)
+df$Lactulose <- as.factor(df$Lactulose)
+df$Gender <- as.factor(df$Gender)
+df$Depression <- as.factor(df$Depression)
+df$SBP <- as.factor(df$SBP)
+df$DM <- as.factor(df$DM)
+df$ETOH <- as.factor(df$ETOH)
+df$Cclass <- as.factor(df$Cclass)
+df$HEStage <- as.factor(df$HEStage)
+df$Ascites <- as.factor(df$Ascites)
+df$EVB <- as.factor(df$EVB)
+df$Varices <- as.factor(df$Varices)
+df$PPIUse <- as.factor(df$PPIUse)
+df$BB <- as.factor(df$BB)
+df$SSRI <- as.factor(df$SSRI)
+df$Diuretics <- as.factor(df$Diuretics)
+df$DayNight <- as.factor(df$DayNight)
+df$Asterixis <- as.factor(df$Asterixis)
+df$HCC <- as.factor(df$HCC)
+df$HBL <- as.factor(df$HBL)
+df$H30 <- as.factor(df$H30)
+df$H3090 <- as.factor(df$H3090)
+df$H90 <- as.factor(df$H90)
+df$CH4BL <- as.factor(df$CH4BL)
+df$CH430 <- as.factor(df$CH430)
+df$CH43090 <- as.factor(df$CH43090)
+df$CH490 <- as.factor(df$CH490)
+df$Hydrogen <- as.factor(df$Hydrogen)
+df$Methane <- as.factor(df$Methane)
+df$any_h2_rise <- as.factor(df$any_h2_rise)
+df$any_me_rise <- as.factor(df$any_me_rise)
+df$any_h2me_rise <- as.factor(df$any_h2me_rise)
+```
+
+Perform pairwise fisher exact tests
+
+```{r, echo=FALSE}
+fish <- list(
+    fisher.test(df$any_h2me_rise, df$Etiology),
+    fisher.test(df$any_h2me_rise, df$Lactulose),
+    fisher.test(df$any_h2me_rise, df$Gender),
+    fisher.test(df$any_h2me_rise, df$Depression),
+    fisher.test(df$any_h2me_rise, df$SBP),
+    fisher.test(df$any_h2me_rise, df$DM),
+    fisher.test(df$any_h2me_rise, df$ETOH),
+    fisher.test(df$any_h2me_rise, df$Cclass),
+    fisher.test(df$any_h2me_rise, df$HEStage),
+    fisher.test(df$any_h2me_rise, df$Ascites),
+    fisher.test(df$any_h2me_rise, df$EVB),
+    fisher.test(df$any_h2me_rise, df$Varices),
+    fisher.test(df$any_h2me_rise, df$PPIUse),
+    fisher.test(df$any_h2me_rise, df$BB),
+    fisher.test(df$any_h2me_rise, df$SSRI),
+    fisher.test(df$any_h2me_rise, df$Diuretics),
+    fisher.test(df$any_h2me_rise, df$DayNight),
+    fisher.test(df$any_h2me_rise, df$Asterixis),
+    fisher.test(df$any_h2me_rise, df$HCC),
+    fisher.test(df$any_h2me_rise, df$HBL),
+    # fisher.test(df$any_h2me_rise, df$H30),
+    # fisher.test(df$any_h2me_rise, df$H3090),
+    # fisher.test(df$any_h2me_rise, df$H90),
+    fisher.test(df$any_h2me_rise, df$CH4BL)
+    # fisher.test(df$any_h2me_rise, df$CH430),
+    # fisher.test(df$any_h2me_rise, df$CH43090),
+    # fisher.test(df$any_h2me_rise, df$CH490),
+    # fisher.test(df$any_h2me_rise, df$Hydrogen),
+    # fisher.test(df$any_h2me_rise, df$Methane),
+    # fisher.test(df$any_h2me_rise, df$any_h2_rise),
+    # fisher.test(df$any_h2me_rise, df$any_me_rise),
+    # fisher.test(df$any_h2me_rise, df$any_h2me_rise)
+)
+```
+
+
+
+
+Filter out variables that had a p value of <= .1
+
+```{r}
+ps <- lapply(fish, '[[', 1)
+ps <- unlist(ps)
+
+sig <- which(ps <= .1)
+fish[sig]
+```
+
+Put the significant variables into a model
+
+```{r}
+model <- glm(any_h2me_rise ~ Ascites + CH4BL, family = binomial(link = 'logit'), data = df)
+summary(model)
+```
+
+
+```{r}
+res <- broom::tidy(model)
+res$or <- exp(res$estimate)
+res
+```
+
+**Having a large volume of fluid is significant when compared to no fluid when looking at any gas (h2 or ch4) increase/elevation.**
+However, according to the OR, you would interpret the values as
+
+> When a person has a large volume of fluid (ascites2), the odds of having some rise is 0.10 times the odds of having no rise, when compared to individuals with no fluid (ascites0) (i.e., more likely to have no gas increase).
+
+Not sure if this makes sense clinically... and want to confirm if I did not potentially flip a variable.
+
+
+## Continuous Variables
+
+
+Run pairwise t-tests for the continuous variales
+
+```{r}
+col_classes <- sapply(df, class)
+col_numeric <- col_classes[col_classes == 'numeric']
+col_numeric_names <- names(col_numeric)
+col_numeric_names <- col_numeric_names[!col_numeric_names %in% c('Patient', 'HT90', 'HT120', 'CH4T90', 'CH4T120')]
+
+ts <- lapply(col_numeric_names, function(x){pairwise.t.test(df[, x, drop = TRUE], df$any_h2me_rise)})
+tsig <- lapply(ts, '[[', 3) <= .1
+```
+
+
+Significant continuous variables
+```{r}
+sig_cont <- ts[tsig]
+names(sig_cont) <- col_numeric_names[tsig]
+sig_cont
+```
+
+
+```{r}
+model <- glm(any_h2me_rise ~ Tbili, family = binomial(link = 'logit'), data = df)
+summary(model)
+```
+
+```{r}
+res <- broom::tidy(model)
+res$or <- exp(res$estimate)
+res
+```
+
+
+**Total bilirubin is significant when looking at any gas (h2 or ch4) increase/elevation.**
+
+> For every 1 unit increase in total bilirubin, the odds of having some gas increase is increased by 0.37 times (i.e., more likely to have no gas increase)
+
+# Fit a model
+
+Fitting a model using both of the significant categorical and continuous variables
+```{r}
+model <- glm(any_h2me_rise ~ Tbili + Ascites, family = binomial(link = 'logit'), data = df)
+summary(model)
+```
+
+```{r}
+res <- broom::tidy(model)
+res$or <- exp(res$estimate)
+res
+```
+
+Large volume of fluide (Ascites2) is still significant in this model. But note the odds ratio less than 1.

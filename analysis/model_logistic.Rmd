@@ -1,0 +1,114 @@
+---
+title: "model_logistic"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(readxl)
+```
+
+```{r}
+df <- read_excel(here::here('data/HEBOnewworksheet5.21.xlsx'))
+
+# replace 999 with NA missing value
+df[df == 999] <- NA
+
+recode_any_rise <- function(h2_me_value) {
+    if (h2_me_value %in% c(0, 10, 20)) {
+        return('no rise')
+    } else if (h2_me_value %in% c(1, 2, 11, 12, 21, 22)) {
+        return('some rise')
+    } else {
+        return(NA)
+    }
+}
+
+df$any_h2_rise <- sapply(df$Hydrogen, recode_any_rise)
+df$any_me_rise <- sapply(df$Methane, recode_any_rise)
+df$any_h2me_rise <- ifelse(df$any_h2_rise == 'some rise' | df$any_me_rise == 'some rise',
+                           'some rise', 'no rise')
+```
+
+```{r}
+drop_cols <- c('Markers')
+
+dim(df)
+df <- df[, !names(df) %in% drop_cols]
+dim(df)
+```
+
+
+
+```{r}
+df$Etiology <- as.factor(df$Etiology)
+df$Lactulose <- as.factor(df$Lactulose)
+df$Gender <- as.factor(df$Gender)
+df$Depression <- as.factor(df$Depression)
+df$SBP <- as.factor(df$SBP)
+df$DM <- as.factor(df$DM)
+df$ETOH <- as.factor(df$ETOH)
+df$Cclass <- as.factor(df$Cclass)
+df$HEStage <- as.factor(df$HEStage)
+df$Ascites <- as.factor(df$Ascites)
+df$EVB <- as.factor(df$EVB)
+df$Varices <- as.factor(df$Varices)
+df$PPIUse <- as.factor(df$PPIUse)
+df$BB <- as.factor(df$BB)
+df$SSRI <- as.factor(df$SSRI)
+df$Diuretics <- as.factor(df$Diuretics)
+df$DayNight <- as.factor(df$DayNight)
+df$Asterixis <- as.factor(df$Asterixis)
+df$HCC <- as.factor(df$HCC)
+df$HBL <- as.factor(df$HBL)
+df$H30 <- as.factor(df$H30)
+df$H3090 <- as.factor(df$H3090)
+df$H90 <- as.factor(df$H90)
+df$CH4BL <- as.factor(df$CH4BL)
+df$CH430 <- as.factor(df$CH430)
+df$CH43090 <- as.factor(df$CH43090)
+df$CH490 <- as.factor(df$CH490)
+df$Hydrogen <- as.factor(df$Hydrogen)
+df$Methane <- as.factor(df$Methane)
+df$any_h2_rise <- as.factor(df$any_h2_rise)
+df$any_me_rise <- as.factor(df$any_me_rise)
+df$any_h2me_rise <- as.factor(df$any_h2me_rise)
+```
+
+```{r}
+model <- glm(formula = any_h2me_rise ~ .,
+             family = binomial(link = 'logit'), data = na.omit(df))
+summary(model)
+#broom::tidy(model)
+```
+
+```{r}
+step(model, direction = 'both')
+```
+
+```{r}
+model <- glm(formula = any_h2me_rise ~ Gender + DM + MELD + NaMELD + Platelet, family = binomial(link = "logit"), 
+    data = na.omit(df), )
+summary(model)
+```
+
+
+
+
+
+```{r}
+library(nnet)
+mod <- multinom(HEStage ~ WBC + Platelet + Tbili + Ammonia + Albumin + PPIUse + BB, data = df)
+coefs <- broom::tidy(mod)
+coefs$estimate <- round(coefs$estimate, 2)
+coefs$p.value <- round(coefs$p.value, 2)
+coefs$std.error <- round(coefs$std.error, 2)
+coefs$statistic <- round(coefs$statistic, 2)
+coefs
+
+coefs[coefs$p.value < .1, ]
+```
+
