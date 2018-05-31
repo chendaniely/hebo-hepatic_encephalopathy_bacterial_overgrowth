@@ -2,7 +2,9 @@
 title: "analysis"
 author: "Daniel Chen"
 date: "5/30/2018"
-output: html_document
+output: 
+  html_document: 
+    toc: yes
 editor_options: 
   chunk_output_type: console
 ---
@@ -191,6 +193,7 @@ col_numeric_names <- names(col_numeric)
 col_numeric_names <- col_numeric_names[!col_numeric_names %in% c('Patient', 'HT90', 'HT120', 'CH4T90', 'CH4T120')]
 
 ts <- lapply(col_numeric_names, function(x){pairwise.t.test(df[, x, drop = TRUE], df$any_h2me_rise)})
+names(ts) <- col_numeric_names
 tsig <- lapply(ts, '[[', 3) <= .1
 ```
 
@@ -234,3 +237,19 @@ res
 ```
 
 Large volume of fluide (Ascites2) is still significant in this model. But note the odds ratio less than 1.
+
+
+# All results
+
+## Fisher
+
+```{r}
+fish
+```
+
+## t
+
+```{r}
+ts
+```
+
