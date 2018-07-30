@@ -1,0 +1,173 @@
+---
+title: "table p"
+output: 
+  html_document: 
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+library(readxl)
+library(dplyr)
+
+df <- read_excel(here::here('data/HEBOnewworksheet5.21.xlsx'))
+
+# replace 999 with NA missing value
+df[df == 999] <- NA
+
+df$Etiology <- as.factor(df$Etiology)
+df$Lactulose <- as.factor(df$Lactulose)
+df$Gender <- as.factor(df$Gender)
+df$Depression <- as.factor(df$Depression)
+df$SBP <- as.factor(df$SBP)
+df$DM <- as.factor(df$DM)
+df$ETOH <- as.factor(df$ETOH)
+df$Cclass <- as.factor(df$Cclass)
+df$HEStage <- as.factor(df$HEStage)
+df$Ascites <- as.factor(df$Ascites)
+df$EVB <- as.factor(df$EVB)
+df$Varices <- as.factor(df$Varices)
+df$PPIUse <- as.factor(df$PPIUse)
+df$BB <- as.factor(df$BB)
+df$SSRI <- as.factor(df$SSRI)
+df$Diuretics <- as.factor(df$Diuretics)
+df$DayNight <- as.factor(df$DayNight)
+df$Asterixis <- as.factor(df$Asterixis)
+df$HCC <- as.factor(df$HCC)
+df$HBL <- as.factor(df$HBL)
+df$H30 <- as.factor(df$H30)
+df$H3090 <- as.factor(df$H3090)
+df$H90 <- as.factor(df$H90)
+df$CH4BL <- as.factor(df$CH4BL)
+df$CH430 <- as.factor(df$CH430)
+df$CH43090 <- as.factor(df$CH43090)
+df$CH490 <- as.factor(df$CH490)
+df$Hydrogen <- as.factor(df$Hydrogen)
+df$Methane <- as.factor(df$Methane)
+```
+
+# Hydrogen
+
+Collapsing the HBL groups
+
+```{r}
+combine_bl <- function(bl) {
+    if (bl == 0) {
+        return(0)
+    } else if (bl %in% c(1, 2)) {
+        return(12)
+    } else {
+        return(NA)
+    }
+}
+
+
+df$hbl_combined <- sapply(df$HBL, combine_bl)
+
+table(df$HBL, df$hbl_combined)
+
+df$hbl_combined <- as.factor(df$hbl_combined)
+```
+
+
+```{r}
+numeric_cols <- lapply(df, class) == 'numeric'
+
+df_aov <- df[, numeric_cols]
+```
+
+## Anova with HBL 0, 1, 2
+
+```{r}
+my_aov <- function(var, group) {
+    form <- sprintf('%s ~ %s', var, group)
+    f <- as.formula(form)
+    mod <- aov(f, df)
+    summary(mod)
+}
+
+results <- lapply(names(df_aov), my_aov, group = 'HBL')
+names(results) <- names(numeric_cols[numeric_cols == TRUE])
+results
+```
+
+## Anova with HBL 0, 1+2
+
+```{r}
+results <- lapply(names(df_aov), my_aov, group = 'hbl_combined')
+names(results) <- names(numeric_cols[numeric_cols == TRUE])
+results
+```
+
+## fisher with HBL 0, 1, 2
+
+```{r}
+my_fisher <- function(x, y){
+    tbl <- table(x, y)
+    fisher.test(tbl)
+}
+
+my_fisher(df$HBL, df$Etiology)
+```
+
+
+```{r}
+fct_cols <- lapply(df, class) == 'factor'
+df_fisher <- df[, fct_cols]
+```
+
+```{r}
+lapply(df_fisher, my_fisher, df$HBL)
+```
+
+
+## fisher with HBL 0, 1+2
+
+```{r}
+lapply(df_fisher, my_fisher, df$hbl_combined)
+```
+
+# Methane
+
+Collapse the methane values
+
+```{r}
+df$ch4_combined <- sapply(df$CH4BL, combine_bl)
+
+table(df$CH4BL, df$ch4_combined)
+
+df$ch4_combined <- as.factor(df$ch4_combined)
+```
+
+## Anova with CH4 0, 1, 2
+
+```{r}
+results <- lapply(names(df_aov), my_aov, group = 'CH4BL')
+names(results) <- names(numeric_cols[numeric_cols == TRUE])
+results
+```
+
+Anova with CH4 0, 1+2
+
+```{r}
+results <- lapply(names(df_aov), my_aov, group = 'ch4_combined')
+names(results) <- names(numeric_cols[numeric_cols == TRUE])
+results
+```
+
+## fisher with HBL 0, 1, 2
+
+```{r}
+lapply(df_fisher, my_fisher, df$CH4BL)
+```
+
+## fisher with HBL 0, 1+2
+
+```{r}
+lapply(df_fisher, my_fisher, df$ch4_combined)
+```
