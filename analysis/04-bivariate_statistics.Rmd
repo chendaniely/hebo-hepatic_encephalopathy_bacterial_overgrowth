@@ -1,0 +1,172 @@
+---
+title: "Bivariate Statistics"
+author: "Daniel Chen"
+date: ""
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+df <- readr::read_csv(here::here('data/working/cleaned_hebo.csv'))
+```
+
+# ESSLunch
+
+Comparing variables against ESSLunch Scores
+
+## Hydrogen Rise
+
+```{r}
+fisher.test(df$lunchESS, df$h2_rise)
+```
+
+## Hydrogen Rise, Any
+
+```{r}
+fisher.test(df$lunchESS, df$h2_rise_any)
+```
+
+## Binned ESSLunch (High/Low)
+
+Bin ESSLunch scores into High/Low values
+
+- scores of 0 or 1 are: low (0)
+- otherwise: high (1)
+
+### Hydrogen Rise
+```{r}
+fisher.test(df$lunchESS_high_low, df$h2_rise)
+```
+
+### Hidrogen Rise, Any
+
+```{r}
+fisher.test(df$lunchESS_high_low, df$h2_rise_any)
+```
+
+
+# Markers
+
+## Hydrogen Rise
+```{r}
+fisher.test(df$markers_recode, df$h2_rise)
+```
+
+## Hydrogen Rise, Any
+
+```{r}
+fisher.test(df$markers_recode, df$h2_rise_any)
+```
+
+# HE
+
+HE Stages:
+
+- 0: none
+- 1: covert
+- 2: overt
+
+## Hydrogen Rise
+```{r}
+fisher.test(df$HEStage, df$h2_rise)
+```
+
+## Hydrogen Rise, Any
+
+```{r}
+fisher.test(df$HEStage, df$h2_rise_any)
+```
+
+## Binned HE Stages (low/high)
+
+- HE stage of 0, 1: low (0)
+- HE stage of 2: high (1)
+
+### Hydrogen Rise
+
+```{r}
+fisher.test(df$he_stage_recode, df$h2_rise)
+```
+
+### Hydrogen Rise, Any
+```{r}
+fisher.test(df$he_stage_recode, df$h2_rise_any)
+```
+
+# Has Hydrogen
+
+```{r}
+# df_he_sub <- df[df$h2_rise == "no rise", ]
+# 
+# h2_sub <- df %>%
+#     select(h2_rise_any, starts_with('ht')) %>%
+#     gather(key = 'h_time', value = 'h_value', HT90, HT120)
+```
+
+## Hydrogen at 90
+```{r}
+fit <- aov(HT90 ~ h2_rise, data = df)
+summary(fit)
+TukeyHSD(fit)
+```
+
+## Has Hydrogen at 90, Any Hydrogen
+
+```{r}
+fit <- aov(HT90 ~ h2_rise_any, data = df)
+summary(fit)
+TukeyHSD(fit)
+```
+
+## Hydrogen at 120
+```{r}
+fit <- aov(HT120 ~ h2_rise, data = df)
+summary(fit)
+TukeyHSD(fit)
+```
+
+## Hydrogen at 120, Any Hydrogen
+```{r}
+fit <- aov(HT120 ~ h2_rise_any, data = df)
+summary(fit)
+TukeyHSD(fit)
+```
+
+## Methane at 90
+```{r}
+fit <- aov(CH4T90 ~ h2_rise, data = df)
+summary(fit)
+TukeyHSD(fit)
+```
+
+## Methane at 90, Any Hydrogen
+```{r}
+fit <- aov(CH4T90 ~ h2_rise_any, data = df)
+summary(fit)
+TukeyHSD(fit)
+```
+
+## Methane at 120
+```{r}
+fit <- aov(CH4T120 ~ h2_rise, data = df)
+summary(fit)
+TukeyHSD(fit)
+```
+
+## Methane at 120, Any Hydrogen
+```{r}
+fit <- aov(CH4T120 ~ h2_rise_any, data = df)
+summary(fit)
+TukeyHSD(fit)
+```
