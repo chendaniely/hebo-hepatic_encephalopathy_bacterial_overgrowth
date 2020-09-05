@@ -1,3 +1,5 @@
+# runs descriptive statistics for the statistical tests
+
 library(ggplot2)
 
 df <- read.csv('./data/working/cleaned_hebo.csv',stringsAsFactors = FALSE)

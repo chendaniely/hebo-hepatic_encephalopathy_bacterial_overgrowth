@@ -44,12 +44,12 @@ Bin ESSLunch scores into High/Low values
 - scores of 0 or 1 are: low (0)
 - otherwise: high (1)
 
-### Hydrogen Rise
+### Hydrogen Rise (sig?)
 ```{r}
 fisher.test(df$lunchESS_high_low, df$h2_rise)
 ```
 
-### Hidrogen Rise, Any
+### Hidrogen Rise, Any (sig)
 
 ```{r}
 fisher.test(df$lunchESS_high_low, df$h2_rise_any)
@@ -99,7 +99,7 @@ fisher.test(df$HEStage, df$h2_rise_any)
 fisher.test(df$he_stage_recode, df$h2_rise)
 ```
 
-### Hydrogen Rise, Any
+### Hydrogen Rise, Any (sig)
 ```{r}
 fisher.test(df$he_stage_recode, df$h2_rise_any)
 ```
@@ -114,7 +114,7 @@ fisher.test(df$he_stage_recode, df$h2_rise_any)
 #     gather(key = 'h_time', value = 'h_value', HT90, HT120)
 ```
 
-## Hydrogen at 90
+## Hydrogen at 90 (sig post-hoc)
 ```{r}
 fit <- aov(HT90 ~ h2_rise, data = df)
 summary(fit)
@@ -129,14 +129,14 @@ summary(fit)
 TukeyHSD(fit)
 ```
 
-## Hydrogen at 120
+## Hydrogen at 120 (sig post-hoc)
 ```{r}
 fit <- aov(HT120 ~ h2_rise, data = df)
 summary(fit)
 TukeyHSD(fit)
 ```
 
-## Hydrogen at 120, Any Hydrogen
+## Hydrogen at 120, Any Hydrogen (sig)
 ```{r}
 fit <- aov(HT120 ~ h2_rise_any, data = df)
 summary(fit)
@@ -150,21 +150,21 @@ summary(fit)
 TukeyHSD(fit)
 ```
 
-## Methane at 90, Any Hydrogen
+## Methane at 90, Any Hydrogen (sig)
 ```{r}
 fit <- aov(CH4T90 ~ h2_rise_any, data = df)
 summary(fit)
 TukeyHSD(fit)
 ```
 
-## Methane at 120
+## Methane at 120 (sig post-hoc)
 ```{r}
 fit <- aov(CH4T120 ~ h2_rise, data = df)
 summary(fit)
 TukeyHSD(fit)
 ```
 
-## Methane at 120, Any Hydrogen
+## Methane at 120, Any Hydrogen (sig)
 ```{r}
 fit <- aov(CH4T120 ~ h2_rise_any, data = df)
 summary(fit)
